@@ -15,9 +15,9 @@ While built as a weekend project to track League of Legends playtime, the archit
 * **Quick Access:** Fast-switch between favorite accounts (e.g., Main, Smurf, Friends).
 * **Secure:** API keys are managed safely using `.env` configuration.
 
-##  Screenshots
+##  Screenshot
 
-<img src="assets/screenshot/pages.png" width="500" > 
+<img src="assets/screenshot/pages.png" width="1000" > 
 
 ##  Key Technical Implementations
 
