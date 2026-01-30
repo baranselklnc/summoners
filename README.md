@@ -17,7 +17,7 @@ While built as a weekend project to track League of Legends playtime, the archit
 
 ##  Screenshots
 
-<img src="assets/screenshot/pages.png" width="250" > 
+<img src="assets/screenshot/pages.png" width="500" > 
 
 ##  Key Technical Implementations
 
