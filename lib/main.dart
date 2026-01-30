@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-// DİKKAT: Oluşturduğun ekran dosyasının adı neyse onu import etmelisin.
-// Örneğin dosya adın 'lol_screen.dart' ise:
-import 'lol_screen.dart'; 
+import 'screens/login_screen.dart'; 
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -15,25 +13,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Uygulama telefonda simge durumuna küçülünce görünen isim
-      title: 'LoL Time Tracker',
+      title: 'Summoner\'s Clock',
       
-      // Sağ üstteki "Debug" bandını kaldırır (Daha profesyonel görünür)
       debugShowCheckedModeBanner: false,
 
-      // --- TEMA AYARLARI ---
-      // Uygulamanın genel temasını koyu (Dark) yapıyoruz ki 
-      // LoL tasarımına uygun olsun.
+
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: const Color(0xFF091428), // LoL Laciverti
+        scaffoldBackgroundColor: const Color(0xFF091428), 
         useMaterial3: true,
       ),
 
-      // Uygulama açıldığında hangi ekran gösterilecek?
-      // Buraya UI dosyasındaki Class adını yazmalısın.
-      // Önceki örnekte 'HomeScreen' demiştik, sen değiştirdiysen onu yaz.
+
       home: const LoginScreen(), 
     );
   }

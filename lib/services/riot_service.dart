@@ -7,8 +7,7 @@ class RiotService {
   final String _regionRouting = 'europe'; 
 
   Map<String, String> get _headers => {
-    "X-Riot-Token": dotenv.env['RIOT_API_KEY'] ?? "", // .env dosyasından alınan API anahtarı
-
+    "X-Riot-Token": dotenv.env['RIOT_API_KEY'] ?? "",
     "Content-Type": "application/json",
   };
 
@@ -39,24 +38,20 @@ class RiotService {
   /// 2. GÜNLÜK SÜRE (Hata Yönetimi Eklenmiş Hali)
   Future<String> getPlayTimeForDate(String puuid, DateTime date) async {
     try {
-      // Adım 1: Maçları çekmeye çalış
       final matchIds = await _getMatchIdsByDate(puuid, date);
       
       if (matchIds.isEmpty) return "0 Dakika (Maç Yok)";
 
-      // Adım 2: Süreleri topla
       final totalSeconds = await _calculateTotalDuration(matchIds);
       return _formatDuration(totalSeconds);
 
     } catch (e) {
-      // ARTIK HATAYI GİZLEMİYORUZ, EKRANA BASIYORUZ!
       return "HATA: $e"; 
     }
   }
 
   // --- YARDIMCI METOTLAR ---
 
-  /// Maç ID'lerini Çeker (Asıl suçlu burasıydı)
   Future<List<String>> _getMatchIdsByDate(String puuid, DateTime date) async {
     final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
@@ -70,13 +65,11 @@ class RiotService {
 
     final response = await http.get(url, headers: _headers);
 
-    // ESKİ KOD: if (200) return list; else return []; <-- SUÇLU BUYDU!
-    // YENİ KOD:
+
     if (response.statusCode == 200) {
       return List<String>.from(json.decode(response.body));
     } else {
-      // Hata kodunu fırlat ki yukarıda yakalayıp ekrana basabilelim
-      // Örn: "429" (Çok Hızlı), "403" (Key Bitti), "500" (Riot Çöktü)
+
       throw "API Hatası (${response.statusCode})"; 
     }
   }
@@ -84,7 +77,6 @@ class RiotService {
   /// Maç detaylarını çeker
   Future<int> _calculateTotalDuration(List<String> matchIds) async {
     final futures = matchIds.map((id) => _getSingleMatchDuration(id));
-    // Eğer detay çekerken hata olursa yine de diğerlerini topla
     final durations = await Future.wait(futures);
     return durations.fold<int>(0, (sum, current) => sum + current);
   }
@@ -100,7 +92,6 @@ class RiotService {
         final data = json.decode(response.body);
         return data['info']['gameDuration'] as int;
       } else {
-        // Detay çekerken hata alırsak (Örn: 429), konsola yaz ama programı kırma
         print("Maç Detay Hatası ($matchId): ${response.statusCode}");
         return 0; 
       }

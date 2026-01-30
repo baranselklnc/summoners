@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:summoners/services/service.dart';
-import 'package:summoners/storage_service.dart';
+import 'package:summoners/services/riot_service.dart';
+import 'package:summoners/services/storage_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 // Paket ismin farklıysa buraları kontrol et
 
@@ -44,7 +44,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _calculateStats();
   }
 
-  // --- İSTATİSTİK MOTORU (GÜNCELLENDİ) ---
   void _calculateStats() {
     if (_savedEvents.isEmpty) return;
 
@@ -63,7 +62,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // 3. SON 7 GÜN ORTALAMA (DEĞİŞEN KISIM)
     int totalMinutesWeek = 0;
-    int daysCountInWeek = 0; // O hafta kaç gün veri var?
+    int daysCountInWeek = 0;
     
     DateTime now = DateTime.now();
     DateTime sevenDaysAgo = now.subtract(const Duration(days: 7));
@@ -72,17 +71,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
       // Tarih son 7 gün içindeyse
       if (date.isAfter(sevenDaysAgo) && date.isBefore(now.add(const Duration(days: 1)))) {
         totalMinutesWeek += _parseMinutes(value);
-        daysCountInWeek++; // Gün sayısını artır
+        daysCountInWeek++; 
       }
     });
 
-    // Ortalamayı hesapla (Sıfıra bölme hatasını önle)
     int avgWeekMinutes = daysCountInWeek == 0 ? 0 : totalMinutesWeek ~/ daysCountInWeek;
 
     setState(() {
       _globalAverage = "${_formatMinToString(avgMinutes)} / gün";
       _monthlyTotal = _formatMinToString(totalMinutesMonth);
-      // Haftalık toplam değil, ortalama yazıyoruz artık
       _last7DaysAverage = "${_formatMinToString(avgWeekMinutes)} / gün"; 
     });
   }
@@ -108,20 +105,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return "$h sa $m dk";
   }
 
-  // --- GÜN SORGULAMA ---
  Future<void> _fetchDataForDay(DateTime date) async {
     setState(() {
       _isLoading = true;
       _resultText = "Kontrol ediliyor...";
     });
 
-    // BUGÜNÜN TARİHİNİ AL
     final now = DateTime.now();
-    // Seçilen tarih bugün mü? (Saat farkını yok sayarak gün kontrolü)
     final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
 
-    // 1. ADIM: ÖNCE HAFIZAYA BAK
-    // ANCAK: Eğer gün "Bugün" ise hafızaya bakma, direkt API'ye git (Refresh yap)
     if (!isToday) {
       String? cachedData = await _storageService.getPlayTime(widget.userPuuid, date);
 
@@ -130,19 +122,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
           _isLoading = false;
           _resultText = "$cachedData (Kayıtlı)";
         });
-        return; // Geçmiş günse ve veri varsa API'ye gitmeden çık
+        return; 
       }
     }
 
-    // 2. ADIM: API'YE GİT (Bugünse veya hafızada yoksa buraya düşer)
     setState(() => _resultText = isToday ? "Güncelleniyor..." : "Riot'a soruluyor...");
 
     String apiResult = await _service.getPlayTimeForDate(widget.userPuuid, date);
 
-    // 3. ADIM: GELEN SONUCU KAYDET
     if (!apiResult.contains("Hata") && !apiResult.contains("Veri alınamadı")) {
       await _storageService.savePlayTime(widget.userPuuid, date, apiResult);
-      await _loadAllMemories(); // Takvimi ve istatistikleri güncelle
+      await _loadAllMemories(); 
     }
 
     setState(() {
@@ -162,20 +152,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // --- İSTATİSTİK KARTLARI ---
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 children: [
-                  // Üst Kart: Genel Ortalama
                   _buildStatCard("GENEL ORTALAMA", _globalAverage, Colors.amber),
                   const SizedBox(height: 10),
-                  // Alt Sıra: Aylık Toplam ve Haftalık Ortalama
                   Row(
                     children: [
                       Expanded(child: _buildStatCard("BU AY TOPLAM", _monthlyTotal, Colors.blueAccent)),
                       const SizedBox(width: 10),
-                      // Başlığı ve rengi güncelledim
                       Expanded(child: _buildStatCard("SON 7 GÜN ORT.", _last7DaysAverage, Colors.greenAccent)),
                     ],
                   )
@@ -183,7 +169,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
 
-            // --- TAKVİM ---
             TableCalendar(
               firstDay: DateTime.utc(2021, 1, 1),
               lastDay: DateTime.now(),
@@ -250,7 +235,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
             const SizedBox(height: 20),
             
-            // --- GÜNLÜK SONUÇ ---
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
