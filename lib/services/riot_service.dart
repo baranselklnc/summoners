@@ -70,7 +70,7 @@ class RiotService {
       return List<String>.from(json.decode(response.body));
     } else {
 
-      throw "API Hatası (${response.statusCode})"; 
+      throw "Çok fazla tıklama yaptınız Riot bunu beğenmedi.Biraz bekleyin ardından tıklamaya devam edin.  (${response.statusCode})"; 
     }
   }
 
