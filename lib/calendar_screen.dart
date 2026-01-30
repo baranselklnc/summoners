@@ -109,29 +109,40 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   // --- GÜN SORGULAMA ---
-  Future<void> _fetchDataForDay(DateTime date) async {
+ Future<void> _fetchDataForDay(DateTime date) async {
     setState(() {
       _isLoading = true;
       _resultText = "Kontrol ediliyor...";
     });
 
-    String? cachedData = await _storageService.getPlayTime(widget.userPuuid, date);
+    // BUGÜNÜN TARİHİNİ AL
+    final now = DateTime.now();
+    // Seçilen tarih bugün mü? (Saat farkını yok sayarak gün kontrolü)
+    final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
 
-    if (cachedData != null) {
-      setState(() {
-        _isLoading = false;
-        _resultText = "$cachedData (Kayıtlı)";
-      });
-      return;
+    // 1. ADIM: ÖNCE HAFIZAYA BAK
+    // ANCAK: Eğer gün "Bugün" ise hafızaya bakma, direkt API'ye git (Refresh yap)
+    if (!isToday) {
+      String? cachedData = await _storageService.getPlayTime(widget.userPuuid, date);
+
+      if (cachedData != null) {
+        setState(() {
+          _isLoading = false;
+          _resultText = "$cachedData (Kayıtlı)";
+        });
+        return; // Geçmiş günse ve veri varsa API'ye gitmeden çık
+      }
     }
 
-    setState(() => _resultText = "Riot'a soruluyor...");
+    // 2. ADIM: API'YE GİT (Bugünse veya hafızada yoksa buraya düşer)
+    setState(() => _resultText = isToday ? "Güncelleniyor..." : "Riot'a soruluyor...");
 
     String apiResult = await _service.getPlayTimeForDate(widget.userPuuid, date);
 
+    // 3. ADIM: GELEN SONUCU KAYDET
     if (!apiResult.contains("Hata") && !apiResult.contains("Veri alınamadı")) {
       await _storageService.savePlayTime(widget.userPuuid, date, apiResult);
-      await _loadAllMemories(); 
+      await _loadAllMemories(); // Takvimi ve istatistikleri güncelle
     }
 
     setState(() {
@@ -139,7 +150,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _resultText = apiResult;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -25,6 +25,8 @@ class _LoginScreenState extends State<LoginScreen> {
     {"name": "IBlue PlayerI", "tag": "TR1"},
     {"name": "Athelas", "tag": "111"},
     {"name": "Temu yasuosu", "tag": "yas"},
+    {"name": "jaehaerysj","tag":"TR1"},
+    {"name": "E L A D E M", "tag": "ôyiô"},
   ];
 
   Future<void> _analyze() async {

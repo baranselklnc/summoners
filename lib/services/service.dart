@@ -1,13 +1,14 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class RiotService {
-  // ⚠️ API Key'ini buraya yapıştır
-  final String _apiKey = 'RGAPI-bebb0634-c1ee-4a00-8871-d1cc25bc9c22'; 
+  
   final String _regionRouting = 'europe'; 
 
   Map<String, String> get _headers => {
-    "X-Riot-Token": _apiKey,
+    "X-Riot-Token": dotenv.env['RIOT_API_KEY'] ?? "", // .env dosyasından alınan API anahtarı
+
     "Content-Type": "application/json",
   };
 
