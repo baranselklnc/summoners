@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 class RiotService {
   
   final String _regionRouting = 'europe'; 
-  final String _specRouting='tr1';
 
   Map<String, String> get _headers => {
     "X-Riot-Token": dotenv.env['RIOT_API_KEY'] ?? "",
@@ -114,10 +113,8 @@ class RiotService {
       final response = await http.get(url, headers: _headers);
       
       if (response.statusCode == 200) {
-        // MAÇ VAR! Veriyi olduğu gibi döndürüyoruz.
         return json.decode(response.body);
       } else {
-        // 404 ise veya hata varsa null döneriz.
         return null; 
       }
     } catch (e) {
