@@ -104,7 +104,6 @@ class RiotService {
 
 
   Future<Map<String, dynamic>?> getLiveGameData(String puuid) async {
-    // Tarayıcıda test ettiğin ve çalışan sunucu bu:
     const platform = 'tr1'; 
     
     final url = Uri.parse(
