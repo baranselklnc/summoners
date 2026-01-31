@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 class RiotService {
   
   final String _regionRouting = 'europe'; 
+  final String _specRouting='tr1';
 
   Map<String, String> get _headers => {
     "X-Riot-Token": dotenv.env['RIOT_API_KEY'] ?? "",
@@ -99,6 +100,51 @@ class RiotService {
       return 0;
     }
   }
+  
+  //Kullanıcının canlı olma durumu 
+  // Future<String> _isOnline(String puuid) async{
+  //   final url=Uri.parse('https://$_specRouting.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/$puuid');
+  //   try{
+  //     final response=await http.get(url,headers: _headers);
+  //     if(response.statusCode==200){
+  //       final data=json.decode(response.body);
+  //       print(data);
+  //       return data;
+  //     }
+  //     else{
+  //       return "${response.statusCode}";
+  //     }
+  //   }
+  //   catch(e){
+  //     return "çalışmadı";
+  //   }
+  // }
+
+  // riot_service.dart içine bu metodu güncelle/ekle:
+
+  Future<Map<String, dynamic>?> getLiveGameData(String puuid) async {
+    // Tarayıcıda test ettiğin ve çalışan sunucu bu:
+    const platform = 'tr1'; 
+    
+    final url = Uri.parse(
+      'https://$platform.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/$puuid'
+    );
+
+    try {
+      final response = await http.get(url, headers: _headers);
+      
+      if (response.statusCode == 200) {
+        // MAÇ VAR! Veriyi olduğu gibi döndürüyoruz.
+        return json.decode(response.body);
+      } else {
+        // 404 ise veya hata varsa null döneriz.
+        return null; 
+      }
+    } catch (e) {
+      print("Bağlantı Hatası: $e");
+      return null;
+    }
+  }
 
   String _formatDuration(int totalSeconds) {
     final hours = totalSeconds ~/ 3600;
@@ -106,4 +152,5 @@ class RiotService {
     if (hours == 0) return "$minutes Dakika";
     return "$hours Saat $minutes Dakika";
   }
+
 }
