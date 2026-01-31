@@ -101,26 +101,7 @@ class RiotService {
     }
   }
   
-  //Kullanıcının canlı olma durumu 
-  // Future<String> _isOnline(String puuid) async{
-  //   final url=Uri.parse('https://$_specRouting.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/$puuid');
-  //   try{
-  //     final response=await http.get(url,headers: _headers);
-  //     if(response.statusCode==200){
-  //       final data=json.decode(response.body);
-  //       print(data);
-  //       return data;
-  //     }
-  //     else{
-  //       return "${response.statusCode}";
-  //     }
-  //   }
-  //   catch(e){
-  //     return "çalışmadı";
-  //   }
-  // }
 
-  // riot_service.dart içine bu metodu güncelle/ekle:
 
   Future<Map<String, dynamic>?> getLiveGameData(String puuid) async {
     // Tarayıcıda test ettiğin ve çalışan sunucu bu:
