@@ -1,57 +1,89 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
-  
-  Future<void> savePlayTime(String puuid, DateTime date, String timeResult) async {
-    final prefs = await SharedPreferences.getInstance();
-    
 
-    String key = _generateKey(puuid, date);
-    
-    await prefs.setString(key, timeResult);
-    print("Hafızaya Kaydedildi: $key -> $timeResult");
+  // ================= SAVE =================
+
+  Future<void> savePlayTime(
+      String puuid, DateTime date, int totalSeconds) async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final key = _generateKey(puuid, date);
+
+    await prefs.setInt(key, totalSeconds);
   }
 
-  Future<String?> getPlayTime(String puuid, DateTime date) async {
+  // ================= GET SINGLE DAY =================
+
+  Future<int?> getPlayTime(
+      String puuid, DateTime date) async {
+
     final prefs = await SharedPreferences.getInstance();
-    String key = _generateKey(puuid, date);
-    
-    // Hafızada var mı?
-    if (prefs.containsKey(key)) {
-      print("Hafızadan Okundu: $key");
-      return prefs.getString(key);
-    }
-    return null; 
+
+    final key = _generateKey(puuid, date);
+
+    return prefs.getInt(key);
   }
 
-  String _generateKey(String puuid, DateTime date) {
-    String dateStr = "${date.year}-${date.month}-${date.day}";
-    return "play_time_${puuid}_$dateStr";
-  }
+  // ================= GET ALL DAYS =================
 
-  Future<Map<DateTime, String>> getAllSavedDays(String puuid) async {
+  Future<Map<DateTime, int>> getAllSavedDays(
+      String puuid) async {
+
     final prefs = await SharedPreferences.getInstance();
-    final allKeys = prefs.getKeys();
-    
-    Map<DateTime, String> savedMap = {};
+    final keys = prefs.getKeys();
 
-    for (String key in allKeys) {
-      if (key.startsWith("play_time_${puuid}_")) {
-        String datePart = key.split('_').last; 
-        List<String> ymd = datePart.split('-');
-        
-        DateTime date = DateTime(
-          int.parse(ymd[0]), 
-          int.parse(ymd[1]), 
-          int.parse(ymd[2])
-        );
+    Map<DateTime, int> result = {};
 
-        String? value = prefs.getString(key);
-        if (value != null) {
-          savedMap[date] = value;
+    for (final key in keys) {
+
+      if (!key.startsWith("play_time_${puuid}_")) continue;
+
+      final dateStr =
+          key.replaceFirst("play_time_${puuid}_", "");
+
+      DateTime? parsedDate;
+
+      parsedDate = DateTime.tryParse(dateStr);
+
+      if (parsedDate == null) {
+        final parts = dateStr.split("-");
+        if (parts.length == 3) {
+          final year = int.tryParse(parts[0]);
+          final month = int.tryParse(parts[1]);
+          final day = int.tryParse(parts[2]);
+
+          if (year != null && month != null && day != null) {
+            parsedDate = DateTime.utc(year, month, day);
+          }
         }
       }
+
+      if (parsedDate == null) continue;
+
+      final seconds = prefs.getInt(key);
+
+      if (seconds != null) {
+        final normalized =
+            DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+
+        result[normalized] = seconds;
+      }
     }
-    return savedMap;
+
+    return result;
+  }
+
+  // ================= KEY GENERATOR =================
+
+  String _generateKey(String puuid, DateTime date) {
+
+    final utc = DateTime.utc(date.year, date.month, date.day);
+
+    final formatted =
+        utc.toIso8601String().substring(0, 10);
+
+    return "play_time_${puuid}_$formatted";
   }
 }
